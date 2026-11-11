@@ -554,6 +554,8 @@
     ctx.restore();
   }
 
+  makeStars();
+
   let last = performance.now();
   function loop(now) {
     const dt = Math.min(50, now - last);
