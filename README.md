@@ -1,12 +1,18 @@
 # Sky Shooter
 
-Ein Browser-Spiel im Space-Invaders-Stil: Ziehe dein Flugzeug mit Finger oder Maus, weiche Gegnern aus, schieße sie ab und sammle Power-Ups (⚡ schnelleres Feuern, 🔥 Dreifach-Schuss, 🛡️ Schild, ❤️ Extra-Leben).
+Ein Browser-Spiel im Space-Invaders-Stil: Ziehe dein Flugzeug mit Finger oder Maus, weiche Gegnern aus, schieße sie ab und sammle Power-Ups.
 
-- 5 Leben — lässt du einen Gegner nach unten durch, verlierst du eines
-- Gegner werden mit der Zeit zahlreicher und schneller
-- Timer oben rechts, Punkte- und Lebenesanzeige oben links
-- Game-Over-Screen mit Neustart-Button
+## Features
+
+- **3 Flugzeuge zur Auswahl** — Jäger (Allrounder), Blitz (schnell & wendig), Titan (langsam, doppelter Schaden)
+- **3 Schwierigkeitsgrade** — Leicht (7 Leben), Normal (5 Leben), Schwer (3 Leben, mehr & schnellere Gegner)
+- **Power-Ups** — ⚡ Schnellfeuer, 🔥 Dreifach-Schuss, 🛡️ Schild, ❤️ Extra-Leben, 💣 Bombe (räumt den ganzen Bildschirm)
+- **Sound & Musik** — komplett ohne Dateien per WebAudio erzeugt, mit Mute-Button
+- **Highscore** — wird lokal im Browser gespeichert und auf dem Start-/Game-Over-Screen angezeigt
+- **Pause** — Button oder Taste `P`/`Esc`; automatische Pause beim Tab-Wechsel
+- **Vollbild-Modus** und **Vibration** auf dem Handy
+- Gegner werden mit der Zeit zahlreicher und schneller; Timer oben rechts
 
 ## Spielen
 
-Die Datei `index.html` öffnen — fertig. Für die öffentliche Version: GitHub Pages aktivieren (Settings → Pages → Branch `main` / root).
+Die Datei `index.html` öffnen — fertig. Öffentliche Version läuft über GitHub Pages.

@@ -34,8 +34,9 @@
     color: #fff;
     z-index: 10;
     padding: 20px;
+    overflow-y: auto;
   }
-  .hidden { display: none; }
+  .hidden { display: none !important; }
   h1 {
     font-size: clamp(42px, 10vw, 84px);
     letter-spacing: 4px;
@@ -46,18 +47,37 @@
     text-shadow: 0 0 40px rgba(90, 120, 255, 0.35);
     margin-bottom: 8px;
   }
+  h2 {
+    font-size: clamp(26px, 6vw, 40px);
+    letter-spacing: 2px;
+    color: #cfe0ff;
+    margin-bottom: 22px;
+  }
   .subtitle {
     font-size: clamp(14px, 3.5vw, 20px);
     color: #9fb3ff;
-    margin-bottom: 34px;
+    margin-bottom: 20px;
   }
   .instructions {
     font-size: clamp(13px, 3.2vw, 17px);
     color: #c9d4ff;
     line-height: 1.9;
-    margin-bottom: 34px;
+    margin-bottom: 22px;
   }
   .instructions b { color: #ffd166; }
+  .record-line {
+    font-size: clamp(15px, 3.6vw, 19px);
+    color: #ffd166;
+    font-weight: 700;
+    margin-bottom: 18px;
+  }
+  .new-record {
+    font-size: clamp(18px, 4.5vw, 24px);
+    color: #ffd166;
+    font-weight: 800;
+    margin-bottom: 14px;
+    text-shadow: 0 0 20px rgba(255, 209, 102, 0.6);
+  }
   .btn {
     padding: 16px 52px;
     font-size: clamp(18px, 4.5vw, 24px);
@@ -72,11 +92,18 @@
     transition: transform 0.12s ease, box-shadow 0.12s ease;
   }
   .btn:hover { transform: scale(1.06); box-shadow: 0 0 45px rgba(120, 160, 255, 0.8); }
+  .btn.secondary {
+    background: transparent;
+    color: #c9d4ff;
+    border: 2px solid rgba(120, 140, 255, 0.5);
+    box-shadow: none;
+  }
+  .btn-row { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
   .stats {
     font-size: clamp(16px, 4vw, 22px);
     color: #c9d4ff;
     line-height: 2;
-    margin-bottom: 30px;
+    margin-bottom: 26px;
   }
   .stats span { color: #ffd166; font-weight: 700; }
   #gameOverTitle {
@@ -86,30 +113,128 @@
     margin-bottom: 14px;
   }
   .plane-icon { font-size: 54px; margin-bottom: 10px; }
+
+  .label {
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #8fa3e8;
+    margin-bottom: 12px;
+  }
+  .diff-row { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; justify-content: center; }
+  .diff-btn {
+    padding: 10px 24px;
+    border-radius: 999px;
+    border: 2px solid rgba(120, 140, 255, 0.4);
+    background: transparent;
+    color: #c9d4ff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .diff-btn.selected {
+    background: linear-gradient(90deg, #4fd1ff, #7c5cff);
+    color: #06102a;
+    border-color: transparent;
+  }
+
+  .ships { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin-bottom: 28px; }
+  .ship-card {
+    width: 158px;
+    padding: 18px 12px 14px;
+    border-radius: 16px;
+    background: rgba(20, 28, 70, 0.85);
+    border: 2px solid rgba(120, 140, 255, 0.35);
+    cursor: pointer;
+    transition: all 0.15s;
+    color: #fff;
+    text-align: center;
+  }
+  .ship-card:hover { transform: translateY(-3px); }
+  .ship-card.selected {
+    border-color: #4fd1ff;
+    box-shadow: 0 0 26px rgba(79, 209, 255, 0.5);
+    transform: translateY(-4px);
+  }
+  .ship-card .emoji { font-size: 42px; }
+  .ship-card h3 { margin: 8px 0 4px; font-size: 19px; letter-spacing: 1px; }
+  .ship-card .desc { font-size: 13px; color: #9fb3ff; line-height: 1.5; }
+  .ship-card .ship-stats { margin-top: 10px; font-size: 12.5px; color: #ffd166; line-height: 1.7; }
+
+  #hud {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 5;
+  }
+  .hud-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(140, 160, 255, 0.35);
+    background: rgba(10, 16, 45, 0.65);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .hud-btn:hover { background: rgba(40, 55, 120, 0.8); }
 </style>
 </head>
 <body>
 <canvas id="game"></canvas>
 
+<div id="hud" class="hidden">
+  <button class="hud-btn" id="muteBtn" title="Ton an/aus">🔊</button>
+  <button class="hud-btn" id="fsBtn" title="Vollbild">⛶</button>
+  <button class="hud-btn" id="pauseBtn" title="Pause">⏸</button>
+</div>
+
 <div id="startScreen" class="overlay">
   <div class="plane-icon">✈️</div>
   <h1>SKY SHOOTER</h1>
   <div class="subtitle">Verteidige den Himmel!</div>
+  <div class="record-line hidden" id="recordLine"></div>
   <div class="instructions">
-    Ziehe dein Flugzeug mit <b>Finger oder Maus</b><br>
-    Es schießt automatisch.<br>
-    Lass keine Gegner durch! Du hast <b>5 Leben</b>.<br>
-    Sammle <b>Power-Ups</b> ⚡ 🔥 🛡️ ❤️
+    Ziehe dein Flugzeug mit <b>Finger oder Maus</b> — es schießt automatisch.<br>
+    Lass keine Gegner durch! Sammle <b>Power-Ups</b>:<br>
+    ⚡ Schnellfeuer &nbsp; 🔥 Dreifach-Schuss &nbsp; 🛡️ Schild &nbsp; ❤️ Leben &nbsp; 💣 Bombe
   </div>
-  <button class="btn" id="startBtn">SPIEL STARTEN</button>
+  <div class="label">Schwierigkeit</div>
+  <div class="diff-row">
+    <button class="diff-btn" data-diff="easy">Leicht</button>
+    <button class="diff-btn selected" data-diff="normal">Normal</button>
+    <button class="diff-btn" data-diff="hard">Schwer</button>
+  </div>
+  <button class="btn" id="startBtn">WEITER</button>
+</div>
+
+<div id="shipScreen" class="overlay hidden">
+  <h2>Wähle dein Flugzeug</h2>
+  <div class="ships" id="shipList"></div>
+  <button class="btn" id="shipStartBtn">LOS GEHT'S!</button>
+</div>
+
+<div id="pauseScreen" class="overlay hidden">
+  <h2>⏸ PAUSE</h2>
+  <div class="btn-row">
+    <button class="btn" id="resumeBtn">WEITER</button>
+    <button class="btn secondary" id="menuBtn">HAUPTMENÜ</button>
+  </div>
 </div>
 
 <div id="gameOverScreen" class="overlay hidden">
   <h1 id="gameOverTitle">GAME OVER</h1>
+  <div class="new-record hidden" id="newRecord">🏆 NEUER REKORD!</div>
   <div class="stats">
     Punkte: <span id="finalScore">0</span><br>
     Überlebt: <span id="finalTime">0:00</span><br>
-    Abschüsse: <span id="finalKills">0</span>
+    Abschüsse: <span id="finalKills">0</span><br>
+    Rekord: <span id="finalRecord">0</span>
   </div>
   <button class="btn" id="restartBtn">NOCHMAL SPIELEN</button>
 </div>
@@ -119,12 +244,25 @@
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
   const startScreen = document.getElementById('startScreen');
+  const shipScreen = document.getElementById('shipScreen');
+  const pauseScreen = document.getElementById('pauseScreen');
   const gameOverScreen = document.getElementById('gameOverScreen');
+  const hud = document.getElementById('hud');
   const startBtn = document.getElementById('startBtn');
+  const shipStartBtn = document.getElementById('shipStartBtn');
   const restartBtn = document.getElementById('restartBtn');
+  const resumeBtn = document.getElementById('resumeBtn');
+  const menuBtn = document.getElementById('menuBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const muteBtn = document.getElementById('muteBtn');
+  const fsBtn = document.getElementById('fsBtn');
+  const recordLine = document.getElementById('recordLine');
+  const newRecordEl = document.getElementById('newRecord');
   const finalScoreEl = document.getElementById('finalScore');
   const finalTimeEl = document.getElementById('finalTime');
   const finalKillsEl = document.getElementById('finalKills');
+  const finalRecordEl = document.getElementById('finalRecord');
+  const shipList = document.getElementById('shipList');
 
   let W, H;
   function resize() {
@@ -134,20 +272,66 @@
   window.addEventListener('resize', resize);
   resize();
 
-  const STATE = { MENU: 0, PLAYING: 1, GAMEOVER: 2 };
+  const STATE = { MENU: 0, SELECT: 1, PLAYING: 2, PAUSED: 3, GAMEOVER: 4 };
   let state = STATE.MENU;
 
+  const SHIPS = [
+    {
+      id: 'jaeger', name: 'JÄGER', emoji: '✈️', color: '#e8f4ff',
+      desc: 'Der Allrounder — zuverlässig in jeder Lage.',
+      speed: 1, fireInterval: 320, damage: 1, size: 1,
+      stats: 'Tempo ★★★ &nbsp; Feuer ★★★ &nbsp; Schaden 1×'
+    },
+    {
+      id: 'blitz', name: 'BLITZ', emoji: '🛩️', color: '#4fd1ff',
+      desc: 'Schnell und wendig mit kleiner Hitbox — aber zarter Schuss.',
+      speed: 1.4, fireInterval: 210, damage: 1, size: 0.85,
+      stats: 'Tempo ★★★★★ &nbsp; Feuer ★★★★★ &nbsp; Schaden 1×'
+    },
+    {
+      id: 'titan', name: 'TITAN', emoji: '🚀', color: '#ffa94d',
+      desc: 'Langsam und wuchtig — aber jeder Treffer trifft doppelt hart.',
+      speed: 0.72, fireInterval: 430, damage: 2, size: 1.25,
+      stats: 'Tempo ★★ &nbsp; Feuer ★★ &nbsp; Schaden 2×'
+    }
+  ];
+
+  const DIFFS = {
+    easy:   { label: 'Leicht', lives: 7, spawnMul: 1.45, speedMul: 0.8 },
+    normal: { label: 'Normal', lives: 5, spawnMul: 1,    speedMul: 1 },
+    hard:   { label: 'Schwer', lives: 3, spawnMul: 0.72, speedMul: 1.25 }
+  };
+
+  const POWERUP_TYPES = [
+    { id: 'rapid',  symbol: '⚡', color: '#ffd166', duration: 8000, label: 'Schnelles Feuer' },
+    { id: 'triple', symbol: '🔥', color: '#ff7b54', duration: 9000, label: 'Dreifach-Schuss' },
+    { id: 'shield', symbol: '🛡️', color: '#4fd1ff', duration: 7000, label: 'Schild' },
+    { id: 'life',   symbol: '❤️', color: '#ff5470', duration: 0,     label: 'Extra-Leben' },
+    { id: 'bomb',   symbol: '💣', color: '#ff6b6b', duration: 0,     label: 'Bombe' }
+  ];
+
+  let selectedShip = 0;
+  let selectedDiff = 'normal';
+
   let player, bullets, enemies, enemyBullets, powerups, particles, stars;
-  let score, lives, kills, startTime, elapsed;
+  let score, lives, kills, elapsed;
   let fireCooldown, spawnTimer, powerupTimer, shake, flash;
   let keys = {};
 
-  const POWERUP_TYPES = [
-    { id: 'rapid',  symbol: '⚡', color: '#ffd166', duration: 8000,  label: 'Schnelles Feuer' },
-    { id: 'triple', symbol: '🔥', color: '#ff7b54', duration: 9000,  label: 'Dreifach-Schuss' },
-    { id: 'shield', symbol: '🛡️', color: '#4fd1ff', duration: 7000,  label: 'Schild' },
-    { id: 'life',   symbol: '❤️', color: '#ff5470', duration: 0,     label: 'Extra-Leben' }
-  ];
+  const HS_KEY = 'skyShooterHighscore';
+  function loadHighscore() {
+    try { return parseInt(localStorage.getItem(HS_KEY)) || 0; } catch (e) { return 0; }
+  }
+  function saveHighscore(v) {
+    try { localStorage.setItem(HS_KEY, String(v)); } catch (e) {}
+  }
+  function refreshRecordLine() {
+    const hs = loadHighscore();
+    if (hs > 0) {
+      recordLine.textContent = '🏆 Rekord: ' + hs + ' Punkte';
+      recordLine.classList.remove('hidden');
+    }
+  }
 
   function makeStars() {
     stars = [];
@@ -162,11 +346,16 @@
   }
 
   function resetGame() {
+    const ship = SHIPS[selectedShip];
+    const diff = DIFFS[selectedDiff];
     player = {
       x: W / 2, y: H - 120,
-      w: 52, h: 60,
+      w: 52 * ship.size, h: 60 * ship.size,
       targetX: W / 2, targetY: H - 120,
-      fireInterval: 320,
+      speed: ship.speed,
+      fireInterval: ship.fireInterval,
+      damage: ship.damage,
+      color: ship.color,
       effects: { rapid: 0, triple: 0, shield: 0 }
     };
     bullets = [];
@@ -175,13 +364,12 @@
     powerups = [];
     particles = [];
     score = 0;
-    lives = 5;
+    lives = diff.lives;
     kills = 0;
-    startTime = performance.now();
     elapsed = 0;
     fireCooldown = 0;
-    spawnTimer = 0;
-    powerupTimer = 0;
+    spawnTimer = 600;
+    powerupTimer = 6000;
     shake = 0;
     flash = 0;
     makeStars();
@@ -189,9 +377,10 @@
 
   function difficulty() {
     const t = elapsed / 1000;
+    const d = DIFFS[selectedDiff];
     return {
-      spawnInterval: Math.max(320, 1300 - t * 22),
-      enemySpeed: 1.6 + Math.min(3.2, t * 0.028),
+      spawnInterval: Math.max(320, (1300 - t * 22) * d.spawnMul),
+      enemySpeed: (1.6 + Math.min(3.2, t * 0.028)) * d.speedMul,
       maxEnemies: Math.min(26, 4 + Math.floor(t / 6))
     };
   }
@@ -228,11 +417,12 @@
   function shoot() {
     const p = player;
     const triple = p.effects.triple > 0;
-    bullets.push({ x: p.x, y: p.y - p.h / 2, vx: 0, vy: -11, r: 4 });
+    bullets.push({ x: p.x, y: p.y - p.h / 2, vx: 0, vy: -11, r: 4, d: p.damage });
     if (triple) {
-      bullets.push({ x: p.x - 18, y: p.y - p.h / 4, vx: -2.4, vy: -10.5, r: 3.4 });
-      bullets.push({ x: p.x + 18, y: p.y - p.h / 4, vx: 2.4, vy: -10.5, r: 3.4 });
+      bullets.push({ x: p.x - 18, y: p.y - p.h / 4, vx: -2.4, vy: -10.5, r: 3.4, d: p.damage });
+      bullets.push({ x: p.x + 18, y: p.y - p.h / 4, vx: 2.4, vy: -10.5, r: 3.4, d: p.damage });
     }
+    SFX.shoot();
   }
 
   function explode(x, y, color, n = 14) {
@@ -243,26 +433,58 @@
     }
   }
 
+  function vibrate(ms) {
+    try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
+  }
+
+  function detonateBomb() {
+    for (const e of enemies) {
+      explode(e.x, e.y, e.color, 18);
+      score += e.pts;
+    }
+    kills += enemies.length;
+    enemies = [];
+    for (const b of enemyBullets) explode(b.x, b.y, '#ff5470', 5);
+    enemyBullets = [];
+    shake = 18;
+    flash = 0.6;
+    SFX.bomb();
+    vibrate(200);
+  }
+
   function loseLife() {
     if (player.effects.shield > 0) return;
     lives--;
     flash = 1;
     shake = 14;
+    SFX.loseLife();
+    vibrate(120);
     if (lives <= 0) endGame();
   }
 
   function endGame() {
     state = STATE.GAMEOVER;
+    hud.classList.add('hidden');
+    stopMusic();
+    SFX.gameover();
+    vibrate(300);
     finalScoreEl.textContent = score;
     finalKillsEl.textContent = kills;
     const s = Math.floor(elapsed / 1000);
     finalTimeEl.textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+    const best = loadHighscore();
+    if (score > best) {
+      saveHighscore(score);
+      newRecordEl.classList.remove('hidden');
+      finalRecordEl.textContent = score;
+    } else {
+      newRecordEl.classList.add('hidden');
+      finalRecordEl.textContent = best;
+    }
     gameOverScreen.classList.remove('hidden');
   }
 
   function update(dt) {
-    const d = difficulty();
-
     for (const s of stars) {
       s.y += s.s * 2.2;
       if (s.y > H) { s.y = -2; s.x = Math.random() * W; }
@@ -270,20 +492,23 @@
 
     if (state !== STATE.PLAYING) return;
 
-    elapsed = performance.now() - startTime;
+    elapsed += dt;
+    const d = difficulty();
 
     for (const k in player.effects) {
       if (player.effects[k] > 0) player.effects[k] -= dt;
     }
 
-    if (keys['ArrowLeft'] || keys['a']) player.targetX -= 420 * dt / 1000;
-    if (keys['ArrowRight'] || keys['d']) player.targetX += 420 * dt / 1000;
-    if (keys['ArrowUp'] || keys['w']) player.targetY -= 420 * dt / 1000;
-    if (keys['ArrowDown'] || keys['s']) player.targetY += 420 * dt / 1000;
+    const move = 420 * player.speed * dt / 1000;
+    if (keys['ArrowLeft'] || keys['a']) player.targetX -= move;
+    if (keys['ArrowRight'] || keys['d']) player.targetX += move;
+    if (keys['ArrowUp'] || keys['w']) player.targetY -= move;
+    if (keys['ArrowDown'] || keys['s']) player.targetY += move;
     player.targetX = Math.max(player.w / 2, Math.min(W - player.w / 2, player.targetX));
     player.targetY = Math.max(H * 0.25, Math.min(H - player.h / 2, player.targetY));
-    player.x += (player.targetX - player.x) * 0.22;
-    player.y += (player.targetY - player.y) * 0.22;
+    const lerp = Math.min(0.35, 0.22 * player.speed);
+    player.x += (player.targetX - player.x) * lerp;
+    player.y += (player.targetY - player.y) * lerp;
 
     fireCooldown -= dt;
     const interval = player.effects.rapid > 0 ? player.fireInterval / 2.6 : player.fireInterval;
@@ -341,13 +566,15 @@
         if (Math.abs(b.x - e.x) < e.w / 2 + b.r &&
             Math.abs(b.y - e.y) < e.h / 2 + b.r) {
           bullets.splice(j, 1);
-          e.hp--;
+          e.hp -= b.d;
           explode(b.x, b.y, '#ffe066', 5);
+          SFX.hit();
           if (e.hp <= 0) {
             explode(e.x, e.y, e.color, 18);
             enemies.splice(i, 1);
             score += e.pts;
             kills++;
+            SFX.explode();
             if (Math.random() < 0.14) spawnPowerup(e.x, e.y);
           }
           break;
@@ -377,12 +604,16 @@
       if (Math.abs(pu.x - player.x) < player.w / 2 + pu.r &&
           Math.abs(pu.y - player.y) < player.h / 2 + pu.r) {
         powerups.splice(i, 1);
+        explode(pu.x, pu.y, pu.type.color, 10);
+        SFX.powerup();
+        vibrate(30);
         if (pu.type.id === 'life') {
-          lives = Math.min(5, lives + 1);
+          lives = Math.min(DIFFS[selectedDiff].lives, lives + 1);
+        } else if (pu.type.id === 'bomb') {
+          detonateBomb();
         } else {
           player.effects[pu.type.id] = pu.type.duration;
         }
-        explode(pu.x, pu.y, pu.type.color, 10);
       }
     }
 
@@ -402,10 +633,10 @@
     ctx.save();
     ctx.translate(p.x, p.y);
     if (isPlayer) {
-      ctx.shadowColor = '#4fd1ff';
+      ctx.shadowColor = p.color;
       ctx.shadowBlur = 18;
     }
-    ctx.fillStyle = isPlayer ? '#e8f4ff' : p.color;
+    ctx.fillStyle = isPlayer ? p.color : p.color;
     ctx.beginPath();
     ctx.moveTo(0, -p.h / 2);
     ctx.lineTo(p.w / 2, p.h / 3);
@@ -444,7 +675,7 @@
     }
     ctx.globalAlpha = 1;
 
-    if (state === STATE.MENU) { ctx.restore(); return; }
+    if (state === STATE.MENU || state === STATE.SELECT) { ctx.restore(); return; }
 
     for (const p of particles) {
       ctx.globalAlpha = Math.max(0, p.life);
@@ -523,7 +754,7 @@
     ctx.textAlign = 'left';
     ctx.fillText('Punkte: ' + score, 16, 34);
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < DIFFS[selectedDiff].lives; i++) {
       ctx.font = '22px serif';
       ctx.fillText(i < lives ? '❤️' : '🖤', 16 + i * 27, 64);
     }
@@ -534,7 +765,7 @@
     ctx.textAlign = 'right';
     ctx.fillText('⏱ ' + timeStr, W - 16, 36);
 
-    let fy = 92;
+    let fy = 96;
     for (const k in player.effects) {
       if (player.effects[k] > 0) {
         const t = POWERUP_TYPES.find(p => p.id === k);
@@ -554,8 +785,6 @@
     ctx.restore();
   }
 
-  makeStars();
-
   let last = performance.now();
   function loop(now) {
     const dt = Math.min(50, now - last);
@@ -564,6 +793,7 @@
     draw();
     requestAnimationFrame(loop);
   }
+  makeStars();
   requestAnimationFrame(loop);
 
   function pointerMove(x, y) {
@@ -583,18 +813,194 @@
   window.addEventListener('keydown', e => {
     keys[e.key] = true;
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
+    if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
+      if (state === STATE.PLAYING) pauseGame();
+      else if (state === STATE.PAUSED) resumeGame();
+    }
   });
   window.addEventListener('keyup', e => { keys[e.key] = false; });
 
-  function start() {
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && state === STATE.PLAYING) pauseGame();
+  });
+
+  // ---------- Audio ----------
+  const audio = { ctx: null, master: null, musicTimer: null, step: 0, muted: false };
+
+  function ensureAudio() {
+    if (!audio.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      audio.ctx = new AC();
+      audio.master = audio.ctx.createGain();
+      audio.master.gain.value = audio.muted ? 0 : 1;
+      audio.master.connect(audio.ctx.destination);
+    }
+    if (audio.ctx.state === 'suspended') audio.ctx.resume();
+  }
+
+  function tone(freq, dur, type = 'square', vol = 0.12, when = 0, slideTo = 0) {
+    if (!audio.ctx || audio.muted) return;
+    const t = audio.ctx.currentTime + when;
+    const o = audio.ctx.createOscillator();
+    const g = audio.ctx.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, t);
+    if (slideTo) o.frequency.exponentialRampToValueAtTime(Math.max(30, slideTo), t + dur);
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.connect(g);
+    g.connect(audio.master);
+    o.start(t);
+    o.stop(t + dur + 0.05);
+  }
+
+  function noiseBurst(dur = 0.3, vol = 0.25) {
+    if (!audio.ctx || audio.muted) return;
+    const len = Math.floor(audio.ctx.sampleRate * dur);
+    const buf = audio.ctx.createBuffer(1, len, audio.ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    const src = audio.ctx.createBufferSource();
+    src.buffer = buf;
+    const g = audio.ctx.createGain();
+    g.gain.value = vol;
+    src.connect(g);
+    g.connect(audio.master);
+    src.start();
+  }
+
+  const SFX = {
+    shoot:    () => tone(880, 0.06, 'square', 0.035, 0, 500),
+    hit:      () => tone(220, 0.05, 'square', 0.06),
+    explode:  () => { noiseBurst(0.22, 0.2); tone(140, 0.22, 'sawtooth', 0.12, 0, 60); },
+    powerup:  () => { tone(523, 0.09, 'square', 0.1); tone(659, 0.09, 'square', 0.1, 0.08); tone(784, 0.14, 'square', 0.1, 0.16); },
+    bomb:     () => { noiseBurst(0.6, 0.35); tone(70, 0.6, 'sawtooth', 0.25, 0, 35); },
+    loseLife: () => { tone(300, 0.25, 'sawtooth', 0.18, 0, 90); noiseBurst(0.2, 0.15); },
+    gameover: () => { tone(392, 0.25, 'triangle', 0.18); tone(330, 0.25, 'triangle', 0.18, 0.22); tone(262, 0.55, 'triangle', 0.18, 0.44); },
+    click:    () => tone(620, 0.06, 'square', 0.07)
+  };
+
+  const MUSIC_PATTERN = [220, 262, 330, 262, 220, 196, 247, 294];
+  function musicStep() {
+    const n = MUSIC_PATTERN[audio.step % MUSIC_PATTERN.length];
+    tone(n, 0.2, 'triangle', 0.045);
+    if (audio.step % 4 === 0) tone(n / 2, 0.32, 'sine', 0.055);
+    if (audio.step % 8 === 6) tone(n * 2, 0.12, 'square', 0.02);
+    audio.step++;
+  }
+  function startMusic() {
+    stopMusic();
+    if (!audio.ctx) return;
+    audio.musicTimer = setInterval(musicStep, 250);
+  }
+  function stopMusic() {
+    if (audio.musicTimer) { clearInterval(audio.musicTimer); audio.musicTimer = null; }
+  }
+
+  function toggleMute() {
+    audio.muted = !audio.muted;
+    if (audio.master) audio.master.gain.value = audio.muted ? 0 : 1;
+    muteBtn.textContent = audio.muted ? '🔇' : '🔊';
+  }
+
+  // ---------- Flow ----------
+  function showShipSelect() {
+    ensureAudio();
+    SFX.click();
+    state = STATE.SELECT;
+    startScreen.classList.add('hidden');
+    shipScreen.classList.remove('hidden');
+  }
+
+  function startGame() {
+    ensureAudio();
+    SFX.click();
     resetGame();
     state = STATE.PLAYING;
     startScreen.classList.add('hidden');
+    shipScreen.classList.add('hidden');
     gameOverScreen.classList.add('hidden');
+    pauseScreen.classList.add('hidden');
+    hud.classList.remove('hidden');
+    startMusic();
   }
 
-  startBtn.addEventListener('click', start);
-  restartBtn.addEventListener('click', start);
+  function pauseGame() {
+    if (state !== STATE.PLAYING) return;
+    state = STATE.PAUSED;
+    stopMusic();
+    pauseScreen.classList.remove('hidden');
+  }
+
+  function resumeGame() {
+    if (state !== STATE.PAUSED) return;
+    ensureAudio();
+    SFX.click();
+    state = STATE.PLAYING;
+    pauseScreen.classList.add('hidden');
+    startMusic();
+  }
+
+  function backToMenu() {
+    state = STATE.MENU;
+    stopMusic();
+    pauseScreen.classList.add('hidden');
+    hud.classList.add('hidden');
+    refreshRecordLine();
+    startScreen.classList.remove('hidden');
+  }
+
+  startBtn.addEventListener('click', showShipSelect);
+  shipStartBtn.addEventListener('click', startGame);
+  restartBtn.addEventListener('click', startGame);
+  resumeBtn.addEventListener('click', resumeGame);
+  menuBtn.addEventListener('click', () => { SFX.click(); backToMenu(); });
+  pauseBtn.addEventListener('click', () => {
+    if (state === STATE.PLAYING) pauseGame();
+    else if (state === STATE.PAUSED) resumeGame();
+  });
+  muteBtn.addEventListener('click', toggleMute);
+  fsBtn.addEventListener('click', () => {
+    SFX.click();
+    try {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen();
+    } catch (e) {}
+  });
+  document.addEventListener('fullscreenchange', () => {
+    fsBtn.textContent = document.fullscreenElement ? '🗗' : '⛶';
+  });
+
+  document.querySelectorAll('.diff-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      ensureAudio();
+      SFX.click();
+      document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedDiff = btn.dataset.diff;
+    });
+  });
+
+  SHIPS.forEach((ship, i) => {
+    const card = document.createElement('div');
+    card.className = 'ship-card' + (i === selectedShip ? ' selected' : '');
+    card.innerHTML =
+      '<div class="emoji">' + ship.emoji + '</div>' +
+      '<h3>' + ship.name + '</h3>' +
+      '<div class="desc">' + ship.desc + '</div>' +
+      '<div class="ship-stats">' + ship.stats + '</div>';
+    card.addEventListener('click', () => {
+      ensureAudio();
+      SFX.click();
+      selectedShip = i;
+      document.querySelectorAll('.ship-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+    });
+    shipList.appendChild(card);
+  });
+
+  refreshRecordLine();
 })();
 </script>
 </body>
